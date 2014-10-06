@@ -16,18 +16,21 @@ def get_cross_validation_sets(data, number_of_tests):
     cross_validation = []
 
     stop_index = len(data) / 5
-    data_folds = [data[(i-1) * stop_index:i * stop_index] for i in range(1, 5)]
+    data_folds = [data[(i-1) * stop_index:i * stop_index] for i in range(1, 6)]
+
+    shape = data.shape
+    training_set_shape = ((data.shape[0] / 5), data.shape[1])
 
     for test_index in range(number_of_tests):
         validation_set_fold_index = number_of_tests - test_index - 1
         validation_set = data_folds[validation_set_fold_index]
-        training_set = np.array([])
+        training_set = np.ndarray(training_set_shape)
         for fold_index in range(len(data_folds)):
             if fold_index == validation_set_fold_index:
                 continue
             np.add(training_set, data_folds[fold_index])    # build training set array
 
-        cross_validation.append({'training_set': np.ndarray(training_set), 'validation_set': validation_set})
+        cross_validation.append({'training_set': training_set, 'validation_set': validation_set})
 
     return cross_validation
 
