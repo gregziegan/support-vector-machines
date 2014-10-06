@@ -4,11 +4,17 @@ import argparse
 import pylab
 import scipy.io
 
+import training
+
 DATA_DIRECTORY = '../data/'
+NUMBER_OF_INDEPENDENT_TESTS = 5
 
 def solve_svm(data):
     S = matrix(data.tolist())
-    print(S)
+
+    cross_validation = training.get_cross_validation_sets(data, NUMBER_OF_INDEPENDENT_TESTS)
+    results = training.train_async(cross_validation, NUMBER_OF_INDEPENDENT_TESTS)
+    print(results)
 
 
 if __name__ == '__main__':
