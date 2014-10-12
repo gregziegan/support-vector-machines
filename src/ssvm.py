@@ -1,18 +1,16 @@
-import argparse
-import scipy.io
+from svm import SupportVectorMachine
+from utils import get_svm_inputs
 
 DATA_DIRECTORY = '../data/'
 
 
-def solve_ssvm(data):
-    print(data)
+class SmoothSupportVectorMachine(SupportVectorMachine):
+
+    @classmethod
+    def solve_svm(cls, data, tradeoff):
+        # TODO more smoothing stuff
+        pass
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="SSVM Solver")
-    parser.add_argument('data_file_name')
-    args = parser.parse_args()
-    filepath = DATA_DIRECTORY + args.data_file_name
-    data = scipy.io.loadmat(filepath)
-    data_key = args.data_file_name.replace('.mat', '')
-    solve_ssvm(data[data_key])
+    SmoothSupportVectorMachine.solve_svm(*get_svm_inputs())

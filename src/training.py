@@ -1,6 +1,7 @@
 import numpy as np
 import threading
 import Queue
+from svm import SupportVectorMachine
 
 
 def get_cross_validation_sets(data, number_of_tests):
@@ -35,7 +36,7 @@ def get_cross_validation_sets(data, number_of_tests):
     return cross_validation
 
 
-def train_async(cross_validation, number_of_tests):
+def train_async(cross_validation, number_of_tests, svm_class, tradeoff):
     """
 
     :param cross_validation: contains the training sets
@@ -49,41 +50,41 @@ def train_async(cross_validation, number_of_tests):
     for thread_id in range(number_of_tests):
         training_set = cross_validation[thread_id]['training_set']
         validation_set = cross_validation[thread_id]['validation_set']
-        t = threading.Thread(target=train_and_validate, args=(training_set, validation_set, queue, thread_id))
+        svm = svm_class(training_set, validation_set, tradeoff)
+        t = threading.Thread(target=train_and_validate, args=(svm, queue, thread_id))
         t.daemon = True
         t.start()
 
     return queue.get()
 
 
-def train_and_validate(training_set, validation_set, queue, thread_id):
+def train_and_validate(svm, queue, thread_id):
     """
     Trains and tests a set of data and stores its result to a queue.
 
-    :param training_set: data to be given to the learning algorithm
-    :type training_set: ndarray
-    :param validation_set: data to be classified by the learning algorithm
+    :param svm: svm object to train with
+    :type svm: SupportVectorMachine
     :param queue: where to put the results of the training session
     :type queue: Queue
     :param thread_id: metadata for the thread
     :type thread_id: int
     :return:
     """
-    train(training_set, thread_id)
+    train(svm, thread_id)
 
-    result = validate(validation_set, queue, thread_id)
+    result = validate(svm, queue, thread_id)
     queue.put(result)
 
 
-def train(training_set, thread_id):
-    for example in training_set:
+def train(svm, thread_id):
+    for example in svm.training_set:
         pass
         # TODO implement training
 
 
-def validate(validation_set, queue, thread_id):
+def validate(svm, queue, thread_id):
     result = None
-    for example in validation_set:
+    for example in svm.validation_set:
         pass
         # TODO implement classification
 
