@@ -7,7 +7,7 @@ DATA_DIRECTORY = '../data/'
 def get_svm_inputs():
     parser = argparse.ArgumentParser(description="SVM Classifier")
     parser.add_argument('data_file_name')
-    parser.add_argument('c', type=int)
+    parser.add_argument('c', type=float)
     args = parser.parse_args()
 
     data_dict = scipy.io.loadmat(DATA_DIRECTORY + args.data_file_name)

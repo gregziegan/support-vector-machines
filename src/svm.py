@@ -18,8 +18,7 @@ class SupportVectorMachine(object):
 
     @classmethod
     def solve_svm(cls, data, c):
-        cross_validation = training.get_cross_validation_sets(data, NUMBER_OF_INDEPENDENT_TESTS)
-        results = training.train_async(cross_validation, NUMBER_OF_INDEPENDENT_TESTS, cls, c)
+        results = training.train_async(data, NUMBER_OF_INDEPENDENT_TESTS, cls, c)
         return results
 
     def train(self, data, class_labels):
@@ -58,8 +57,8 @@ class SupportVectorMachine(object):
     def _calculate_intercept_and_weight_vector(self, data, class_labels, qp_solution):
         self.intercept = 0
         solution_array = np.ravel(qp_solution['x'])
-        support_vector_booleans = np.nonzero(solution_array)  # create array of True/False for lagrange multipliers
-        sv_indices = np.arange(len(solution_array))[support_vector_booleans]
+        support_vector_booleans = solution_array > 1e-6  # create ndarray of True/False for lagrange multipliers
+        sv_indices = np.arange(len(solution_array))[support_vector_booleans]  # get indices of nonzero
         support_vectors = data[support_vector_booleans]
         support_vector_labels = class_labels[support_vector_booleans]
 
