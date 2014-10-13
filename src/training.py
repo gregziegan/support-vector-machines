@@ -17,8 +17,8 @@ def get_cross_validation_sets(data, number_of_tests):
     :return:
     """
     for k in xrange(number_of_tests):
-        training = np.array([x for i, x in enumerate(data) if i % number_of_tests != k])
-        validation = np.array([x for i, x in enumerate(data) if i % number_of_tests == k])
+        training = np.array([x for i, x in enumerate(data) if i % number_of_tests != k], np.float64)
+        validation = np.array([x for i, x in enumerate(data) if i % number_of_tests == k], np.float64)
         yield training, validation
 
 
@@ -46,6 +46,14 @@ def train_async(data, number_of_tests, svm_class, c):
     return queue.get()
 
 
+def get_usable_data_and_class_labels(data):
+    data_column_indices = [i for i in range(1, len(data[0]) - 1)]
+    usable_data = data[:, data_column_indices]
+    class_labels = data[:, len(data[0]) - 1]
+    class_labels = np.array([y if y != 0 else -1 for y in class_labels])
+    return usable_data, class_labels
+
+
 def train_and_classify(svm, training_set, validation_set, queue, thread_id):
     """
     Trains and tests a set of data and stores its result to a queue.
@@ -56,11 +64,12 @@ def train_and_classify(svm, training_set, validation_set, queue, thread_id):
     :type queue: Queue
     :return:
     """
-    training_data_column_indices = [i for i in range(1, len(training_set[0]) - 1)]
-    training_data = training_set[:, training_data_column_indices]
-    class_labels = (training_set[:, len(training_set[0]) - 1]).astype(float)
 
+    training_data, class_labels = get_usable_data_and_class_labels(training_set)
     svm.train(training_data, class_labels)
 
-    result = svm.classify(validation_set)
-    queue.put(result)
+    validation_data, class_labels = get_usable_data_and_class_labels(validation_set)
+    predictions = svm.classify(validation_data)
+    num_correct = np.sum(predictions == class_labels)
+    print "{}/{} correct predictions".format(num_correct, len(predictions))
+    queue.put(predictions)
