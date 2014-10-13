@@ -1,5 +1,5 @@
 import threading
-import Queue
+from Queue import Queue
 from svm import SupportVectorMachine
 import numpy as np
 from numpy import ndarray
@@ -31,19 +31,29 @@ def train_async(data, number_of_tests, svm_class, c):
     :param c: C value, trade off between generalization and error
     :return:
     """
-    queue = Queue.Queue()
+    q = Queue()
 
     logging.debug("Spawning threads...")
+    threads = []
     thread_id = 0
     for training_set, validation_set in get_cross_validation_sets(data, number_of_tests):
         svm = svm_class(c)
-        t = threading.Thread(target=train_and_classify, args=(svm, training_set, validation_set, queue, thread_id))
+        t = threading.Thread(target=train_and_classify, args=(svm, training_set, validation_set, q, thread_id))
         t.daemon = True
         t.start()
+        threads.append(t)
+
         thread_id += 1
 
+    for t in threads:
+        t.join()
+
     logging.debug("Threads finished executing.")
-    return queue.get()
+
+    results = []
+    while not q.empty():
+        results.append(q.get())
+    return results
 
 
 def get_usable_data_and_class_labels(data):
@@ -54,14 +64,14 @@ def get_usable_data_and_class_labels(data):
     return usable_data, class_labels
 
 
-def train_and_classify(svm, training_set, validation_set, queue, thread_id):
+def train_and_classify(svm, training_set, validation_set, q, thread_id):
     """
     Trains and tests a set of data and stores its result to a queue.
 
     :param svm: svm object to train with
     :type svm: SupportVectorMachine
-    :param queue: where to put the results of the training session
-    :type queue: Queue
+    :param q: where to put the results of the training session
+    :type q: Queue
     :return:
     """
 
@@ -72,4 +82,5 @@ def train_and_classify(svm, training_set, validation_set, queue, thread_id):
     predictions = svm.classify(validation_data)
     num_correct = np.sum(predictions == class_labels)
     print "{}/{} correct predictions".format(num_correct, len(predictions))
-    queue.put(predictions)
+    q.put(predictions)
+    q.task_done()
