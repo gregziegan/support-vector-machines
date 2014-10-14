@@ -75,6 +75,6 @@ def print_performance(results):
             precisions.append(get_precision(num_true_positives, num_false_positives))
             recalls.append(get_recall(num_true_positives, num_false_negatives))
 
-    print "Accuracy: {} {}".format(np.mean(accuracies), np.std(accuracies))
-    print "Precision: {} {}".format(np.mean(precisions), np.std(precisions))
-    print "Recall: {} {}".format(np.mean(recalls), np.std(recalls))
+    print "Accuracy: {:0.3f} {:0.3f}".format(np.mean(accuracies), np.std(accuracies))
+    print "Precision: {:0.3f} {:0.3f}".format(np.mean(precisions), np.std(precisions))
+    print "Recall: {:0.3f} {:0.3f}".format(np.mean(recalls), np.std(recalls))
