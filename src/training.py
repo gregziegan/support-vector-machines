@@ -2,7 +2,6 @@ import threading
 from Queue import Queue
 from svm import SupportVectorMachine
 import numpy as np
-from numpy import ndarray
 import logging
 logging.basicConfig(filename='training.log', level=logging.DEBUG)
 
@@ -25,7 +24,7 @@ def get_cross_validation_sets(data, number_of_tests):
 def train_async(data, number_of_tests, svm_class, c):
     """
     :param data: data set to learn
-    :type data: ndarray
+    :type data: np.ndarray
     :param number_of_tests: how many tests to perform/threads to spawn
     :type number_of_tests: int
     :param c: C value, trade off between generalization and error
@@ -45,6 +44,7 @@ def train_async(data, number_of_tests, svm_class, c):
 
         thread_id += 1
 
+    logging.debug("Threads processing...")
     for t in threads:
         t.join()
 

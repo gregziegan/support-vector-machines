@@ -1,7 +1,7 @@
 from cvxopt import matrix, solvers
 import numpy as np
-from utils import get_svm_inputs
-
+import time
+from utils import get_svm_inputs, timing
 import training
 
 DATA_DIRECTORY = '../data/'
@@ -20,9 +20,9 @@ class SupportVectorMachine(object):
         self._gramian_matrix = None
 
     @classmethod
+    @timing
     def solve_svm(cls, data, c):
-        results = training.train_async(data, NUMBER_OF_INDEPENDENT_TESTS, cls, c)
-        return results
+        return training.train_async(data, NUMBER_OF_INDEPENDENT_TESTS, cls, c)
 
     def train(self, data, class_labels):
         """
@@ -86,4 +86,3 @@ class SupportVectorMachine(object):
 
 if __name__ == '__main__':
     results = SupportVectorMachine.solve_svm(*get_svm_inputs())
-    print results
