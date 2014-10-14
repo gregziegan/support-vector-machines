@@ -2,10 +2,11 @@ import argparse
 import numpy as np
 import scipy.io
 import time
+import os
 
 from mldata import parse_c45
 
-DATA_DIRECTORY = '../data/'
+DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), '../data/')
 
 
 def get_svm_inputs():
