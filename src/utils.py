@@ -14,7 +14,7 @@ def get_svm_inputs():
     data_dict = scipy.io.loadmat(DATA_DIRECTORY + args.data_file_name)
     data_set_key = args.data_file_name.replace('.mat', '')
     data_set = data_dict[data_set_key]
-    return data_set, args.c
+    return data_set.astype(float), args.c
 
 
 def timing(f):

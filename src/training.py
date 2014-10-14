@@ -2,29 +2,51 @@ import threading
 from Queue import Queue
 from svm import SupportVectorMachine
 import numpy as np
+from numpy import ndarray
+import itertools
 import logging
 logging.basicConfig(filename='training.log', level=logging.DEBUG)
 
 
-def get_cross_validation_sets(data, number_of_tests):
+def get_stratified_cross_validation_sets(data, number_of_tests):
     """
 
-    :param data: data to be tested in a number of combinations
+    :param data: data to be tested in a number of combinations, last col must be class labels
     :type data: ndarray
     :param number_of_tests: the number of training/validation set pairs to return
     :type number_of_tests: int
     :return:
     """
-    for k in xrange(number_of_tests):
-        training = np.array([x for i, x in enumerate(data) if i % number_of_tests != k], np.float64)
-        validation = np.array([x for i, x in enumerate(data) if i % number_of_tests == k], np.float64)
+    folds = get_stratified_folds(data, number_of_tests)
+    for fold_index in range(len(folds)):
+        training = itertools.chain(*[fold for i, fold in enumerate(folds) if i % number_of_tests != fold_index])
+        validation = itertools.chain(*[fold for i, fold in enumerate(folds) if i % number_of_tests == fold_index])
+        training = np.array(list(training), np.float64)
+        validation = np.array(list(validation), np.float64)
+        np.random.shuffle(training)
+        np.random.shuffle(validation)
         yield training, validation
+
+
+def get_stratified_folds(data, number_of_tests):
+    """
+
+    :param data: data set with last col of class labels
+    :type data: ndarray
+    :param number_of_tests:
+    :return:
+    """
+    stratified_folds = [[] for i in range(number_of_tests)]
+    for i, example in enumerate(sorted(data, key=lambda e: e[-1])):
+        stratified_folds[i % number_of_tests].append(example)
+
+    return stratified_folds
 
 
 def train_async(data, number_of_tests, svm_class, c):
     """
     :param data: data set to learn
-    :type data: np.ndarray
+    :type data: ndarray
     :param number_of_tests: how many tests to perform/threads to spawn
     :type number_of_tests: int
     :param c: C value, trade off between generalization and error
@@ -35,7 +57,7 @@ def train_async(data, number_of_tests, svm_class, c):
     logging.debug("Spawning threads...")
     threads = []
     thread_id = 0
-    for training_set, validation_set in get_cross_validation_sets(data, number_of_tests):
+    for training_set, validation_set in get_stratified_cross_validation_sets(data, number_of_tests):
         svm = svm_class(c)
         t = threading.Thread(target=train_and_classify, args=(svm, training_set, validation_set, q, thread_id))
         t.daemon = True

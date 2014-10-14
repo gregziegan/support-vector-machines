@@ -1,6 +1,5 @@
 from cvxopt import matrix, solvers
 import numpy as np
-import time
 from utils import get_svm_inputs, timing
 import training
 
