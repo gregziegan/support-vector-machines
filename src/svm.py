@@ -1,6 +1,6 @@
 from cvxopt import matrix, solvers
 import numpy as np
-from utils import get_svm_inputs, timing
+from utils import get_svm_inputs, timing, print_performance
 import training
 
 DATA_DIRECTORY = '../data/'
@@ -85,3 +85,8 @@ class SupportVectorMachine(object):
 
 if __name__ == '__main__':
     results = SupportVectorMachine.solve_svm(*get_svm_inputs())
+    for result in results:
+        num_correct = np.sum(result['predictions'] == result['class_labels'])
+        print "{}/{} correct predictions".format(num_correct, len(result['predictions']))
+
+    print_performance(results)

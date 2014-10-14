@@ -13,18 +13,19 @@ def get_stratified_cross_validation_sets(data, number_of_tests):
 
     :param data: data to be tested in a number of combinations, last col must be class labels
     :type data: ndarray
-    :param number_of_tests: the number of training/validation set pairs to return
+    :param number_of_tests: the number of training/validation set pairs to yield
     :type number_of_tests: int
     :return:
     """
+    random = np.random.RandomState(seed=12345)
     folds = get_stratified_folds(data, number_of_tests)
     for fold_index in range(len(folds)):
         training = itertools.chain(*[fold for i, fold in enumerate(folds) if i % number_of_tests != fold_index])
         validation = itertools.chain(*[fold for i, fold in enumerate(folds) if i % number_of_tests == fold_index])
         training = np.array(list(training), np.float64)
         validation = np.array(list(validation), np.float64)
-        np.random.shuffle(training)
-        np.random.shuffle(validation)
+        random.shuffle(training)
+        random.shuffle(validation)
         yield training, validation
 
 
@@ -102,7 +103,5 @@ def train_and_classify(svm, training_set, validation_set, q, thread_id):
 
     validation_data, class_labels = get_usable_data_and_class_labels(validation_set)
     predictions = svm.classify(validation_data)
-    num_correct = np.sum(predictions == class_labels)
-    print "{}/{} correct predictions".format(num_correct, len(predictions))
-    q.put(predictions)
+    q.put({'predictions': predictions, 'class_labels': class_labels})
     q.task_done()

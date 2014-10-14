@@ -1,6 +1,9 @@
 import argparse
+import numpy as np
 import scipy.io
 import time
+
+from mldata import parse_c45
 
 DATA_DIRECTORY = '../data/'
 
@@ -11,10 +14,14 @@ def get_svm_inputs():
     parser.add_argument('c', type=float)
     args = parser.parse_args()
 
-    data_dict = scipy.io.loadmat(DATA_DIRECTORY + args.data_file_name)
-    data_set_key = args.data_file_name.replace('.mat', '')
-    data_set = data_dict[data_set_key]
-    return data_set.astype(float), args.c
+    if args.data_file_name.endswith(".mat"):
+        data_dict = scipy.io.loadmat(DATA_DIRECTORY + args.data_file_name)
+        data_set_key = args.data_file_name.replace('.mat', '')
+        data_set = (data_dict[data_set_key]).astype(float)
+    else:
+        example_set = parse_c45(args.data_file_name, DATA_DIRECTORY)
+        data_set = np.array(example_set.to_float())
+    return data_set, args.c
 
 
 def timing(f):
@@ -25,3 +32,48 @@ def timing(f):
         print '%s function took %0.3f seconds' % (f.func_name, (time2-time1))
         return ret
     return wrap
+
+
+def get_accuracy(num_true_positives, num_false_positives, num_true_negatives, num_false_negatives):
+    return (num_true_positives + num_true_negatives) / (num_true_positives + num_true_negatives +
+                                                        num_false_positives + num_false_negatives)
+
+
+def get_precision(num_true_positives, num_false_positives):
+    if num_false_positives == 0:
+        return 1.0
+    return num_true_positives / (num_true_positives + num_false_positives)
+
+
+def get_recall(num_true_positives, num_false_negatives):
+    if num_false_negatives == 0:
+        return 1.0
+    return num_true_positives / (num_true_positives + num_false_negatives)
+
+
+def print_performance(results):
+    num_true_positives, num_false_positives, num_true_negatives, num_false_negatives = 0.0, 0.0, 0.0, 0.0
+
+    accuracies, precisions, recalls = [], [], []
+    for result in results:
+        predictions, class_labels = result['predictions'], result['class_labels']
+        for prediction, class_label in zip(predictions, class_labels):
+            if prediction > 0:
+                if class_label > 0:
+                    num_true_positives += 1
+                else:
+                    num_false_positives += 1
+            else:
+                if class_label <= 0:
+                    num_true_negatives += 1
+                else:
+                    num_false_negatives += 1
+
+            accuracies.append(get_accuracy(num_true_positives, num_false_positives,
+                                           num_true_negatives, num_false_negatives))
+            precisions.append(get_precision(num_true_positives, num_false_positives))
+            recalls.append(get_recall(num_true_positives, num_false_negatives))
+
+    print "Accuracy: {} {}".format(np.mean(accuracies), np.std(accuracies))
+    print "Precision: {} {}".format(np.mean(precisions), np.std(precisions))
+    print "Recall: {} {}".format(np.mean(recalls), np.std(recalls))
