@@ -220,9 +220,9 @@ if __name__ == "__main__":
         plot_contour(X_train[y_train==1], X_train[y_train==-1], clf)
 
     def test_soft():
-        #X1, y1, X2, y2 = gen_lin_separable_overlap_data()
-        #old_X_train, old_y_train = split_train(X1, y1, X2, y2)
-        #old_X_test, old_y_test = split_test(X1, y1, X2, y2)
+        X1, y1, X2, y2 = gen_lin_separable_overlap_data()
+        old_X_train, old_y_train = split_train(X1, y1, X2, y2)
+        old_X_test, old_y_test = split_test(X1, y1, X2, y2)
 
         # v -- modified code to take into my data sets for testing -- v
         from src.utils import get_svm_inputs
