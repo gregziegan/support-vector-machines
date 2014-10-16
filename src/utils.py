@@ -22,7 +22,7 @@ def get_svm_inputs():
     else:
         example_set = parse_c45(args.data_file_name, DATA_DIRECTORY)
         data_set = np.array(example_set.to_float())
-    return data_set, args.c
+    return normalize(data_set), args.c
 
 
 def timing(f):
@@ -50,6 +50,15 @@ def get_recall(num_true_positives, num_false_negatives):
     if num_false_negatives == 0:
         return 1.0
     return num_true_positives / (num_true_positives + num_false_negatives)
+
+
+def normalize(data):
+    stds = data.std(axis=0)
+    means = data.mean(axis=0)
+    for example in range(0, len(data)):
+        for i in range(1, data[example].size - 1):
+            data[example][i] = (data[example][i] - means[i]) / stds[i]
+    return data
 
 
 def print_performance(results):
