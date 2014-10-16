@@ -3,7 +3,7 @@ from numpy import linalg
 import math
 
 from svm import SupportVectorMachine
-from utils import get_svm_inputs
+from utils import get_svm_inputs, print_performance
 
 DATA_DIRECTORY = '../data/'
 NUMBER_OF_INDEPENDENT_TESTS = 5
@@ -118,8 +118,15 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
             distance_to_solution = step * (self._z_gradient * np.transpose(self._z_gradient))[0, 0]
 
     def classify(self, data):
+        return np.sign(np.array([self.predict(example) for example in data]))
 
-        return (np.dot(np.transpose(self._w), data) - self._gamma)[0, 0]
+    def predict(self, example):
+        return (np.dot(np.transpose(self._w), example) - self._gamma)[0, 0]
 
 if __name__ == '__main__':
-    SmoothSupportVectorMachine.solve_svm(*get_svm_inputs())
+    results = SmoothSupportVectorMachine.solve_svm(*get_svm_inputs())
+    for result in results:
+        num_correct = np.sum(result['predictions'] == result['class_labels'])
+        print "{}/{} correct predictions".format(num_correct, len(result['predictions']))
+
+    print_performance(results)
