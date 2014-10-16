@@ -47,6 +47,7 @@ class SupportVectorMachine(object):
         g = matrix(np.vstack((np.diag(q_arr), np.identity(num_samples))))
         h = matrix(np.hstack((np.zeros(num_samples), np.ones(num_samples) * self.c)))
 
+        solvers.options['show_progress'] = False
         return solvers.qp(p, q, g, h)
 
     def _calculate_gramian_matrix(self, data):

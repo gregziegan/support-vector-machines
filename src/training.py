@@ -1,6 +1,5 @@
 import threading
 from Queue import Queue
-from svm import SupportVectorMachine
 import numpy as np
 from numpy import ndarray
 import itertools
@@ -92,7 +91,6 @@ def train_and_classify(svm, training_set, validation_set, q, thread_id):
     Trains and tests a set of data and stores its result to a queue.
 
     :param svm: svm object to train with
-    :type svm: SupportVectorMachine
     :param q: where to put the results of the training session
     :type q: Queue
     :return:
