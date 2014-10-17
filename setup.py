@@ -9,5 +9,5 @@ setup(
     author='Greg Ziegan, MJ Harkins',
     author_email='greg.ziegan@gmail.com, mph47@case.edu',
     description='Smooth Support Vector Learning Algorithm',
-    requires=['numpy', 'matplotlib', 'scipy', 'cvxopt', 'pytest']
+    requires=['numpy', 'scipy', 'cvxopt', 'pytest']
 )
