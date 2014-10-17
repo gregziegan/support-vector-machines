@@ -1,5 +1,6 @@
 argparse==1.2.1
 cvxopt==1.1.7
+eecs440-ssvm==1.0
 matplotlib==1.4.0
 mock==1.0.1
 nose==1.3.4
