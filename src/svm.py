@@ -36,14 +36,14 @@ class SupportVectorMachine(object):
 
     def solve_quadratic_problem(self, data, class_labels):
         num_samples, num_features = data.shape
-        q_arr = np.ones(num_samples) * -1
+        negative_dense_arr = np.ones(num_samples) * -1
         self._calculate_gramian_matrix(data)
 
         # set up qp parameters for the qp solver which takes the form:
         # (1/2) * x.T * P * x + q.T * x; G * x <= h
         p = matrix(np.outer(class_labels, class_labels) * self._gramian_matrix)
-        q = matrix(q_arr)
-        g = matrix(np.vstack((np.diag(q_arr), np.identity(num_samples))))
+        q = matrix(negative_dense_arr)
+        g = matrix(np.vstack((np.diag(negative_dense_arr), np.identity(num_samples))))
         h = matrix(np.hstack((np.zeros(num_samples), np.ones(num_samples) * self.c)))
 
         solvers.options['show_progress'] = False
@@ -78,12 +78,12 @@ class SupportVectorMachine(object):
         """
         self._intercept = 0
 
-        solution_array = np.ravel(qp_solution['x'])  # a
-        support_vector_booleans = solution_array > 1e-6  # sv create ndarray of True/False for lagrange multipliers
-        sv_indices = np.arange(len(solution_array))[support_vector_booleans]  # ind get indices of nonzero
-        solution_array = solution_array[support_vector_booleans]  # self.a
-        support_vectors = data[support_vector_booleans]  # self.sv
-        support_vector_labels = class_labels[support_vector_booleans]  # self.sv_y
+        solution_array = np.ravel(qp_solution['x'])
+        support_vector_booleans = solution_array > 1e-6  # create ndarray of True/False for lagrange multipliers
+        sv_indices = np.arange(len(solution_array))[support_vector_booleans]  # get indices of non-zero elements
+        solution_array = solution_array[support_vector_booleans]
+        support_vectors = data[support_vector_booleans]
+        support_vector_labels = class_labels[support_vector_booleans]
 
         for solution_index in range(len(solution_array)):
             self._intercept += support_vector_labels[solution_index]
@@ -94,14 +94,6 @@ class SupportVectorMachine(object):
         self._calculate_weight_vector(solution_array, support_vector_labels, support_vectors, data.shape[1])
 
     def _calculate_weight_vector(self, solution_array, support_vector_labels, support_vectors, num_features):
-        """
-
-        :param solution_array:
-        :param support_vector_labels:
-        :param support_vectors:
-        :param num_features:
-        :return:
-        """
         self._weight_vector = np.zeros(num_features)
         for i in range(len(solution_array)):
             self._weight_vector += solution_array[i] * support_vector_labels[i] * support_vectors[i]

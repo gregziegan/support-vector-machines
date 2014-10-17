@@ -13,7 +13,7 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
 
     def __init__(self, c):
         super(SmoothSupportVectorMachine, self).__init__(c)
-        self.alpha = 5
+        self.alpha = 5  # not sure what to set this value as? Could not find a good specification other than > 0
 
         # instance variables to be calculated during training:
         self._a = None
@@ -26,7 +26,7 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
         self._z_gradient = None
 
     def _smoothing_function(self, x):
-        return x + 1.0/self.alpha * np.log(1 + np.exp(-self.alpha * x))
+        return x + 1.0/self.alpha * np.log(1 + np.exp(-self.alpha * x))  # eq. (8) in paper
 
     def _get_next_w(self, current_w, step, step_direction):
         return current_w + step * step_direction[0:self._num_features]
@@ -36,7 +36,7 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
 
     def _objective_function(self, gamma, w):
         """
-
+        Equation 9 in paper, the phi function
         :param gamma: distance from decision boundary
         :type gamma: float
         :param w: weight vector
@@ -50,14 +50,15 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
     def _calculate_hessian(self, plus_function_input):
         """
         Updates the hessian instance variable with the new plus_function input.
+        Reference: Equation (19) in the paper. Algorithm 3.1
         :type plus_function_input: matrix
         :return:
         """
         h = 0.5 * (self._e + np.sign(plus_function_input))
         t = np.identity(h.shape[0])
-        sh = np.transpose((self._d * self._a)) * t
-        p = sh * (self._d * self._a)
-        q = sh * (self._d * self._e)
+        separating_hyperplane = np.transpose((self._d * self._a)) * t
+        p = separating_hyperplane * (self._d * self._a)
+        q = separating_hyperplane * (self._d * self._e)
 
         tmp1 = np.identity(self._w.shape[0] + 1)
         tmp2 = self.c * np.vstack((np.hstack((p, -q)), np.hstack((np.transpose(-q), np.mat([linalg.norm(h)])))))
@@ -75,7 +76,7 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
         """
         plus_function_input = self._e - (((self._d * self._a) * w) - ((self._d * self._e) * gamma))
         self._calculate_hessian(plus_function_input)
-        plus_function = (plus_function_input < 0).choose(plus_function_input, 0)  # (7) in the paper
+        plus_function = (plus_function_input < 0).choose(plus_function_input, 0)  # eq. (7) in the paper
 
         z_gradient = np.vstack((
             (w - self.c * np.transpose((self._d * self._a)) * plus_function),
@@ -86,7 +87,7 @@ class SmoothSupportVectorMachine(SupportVectorMachine):
 
     def _get_next_armijo_step(self, w, gamma, step_direction, step_gap):
         """
-
+        Equation (20) and (21) in the paper
         :param w: weight vector
         :type w: matrix
         :param gamma: distance to decision boundary
