@@ -2,6 +2,8 @@
 
 Another grand project for EECS 440
 
+### Note: Currently uses much too specific parser for class at CWRU. Will soon be made general purpose. But don't use ours, use [scikit-learn's](http://scikit-learn.org/stable/modules/svm.html)!
+
 ## Installation
 
     python setup.py install
